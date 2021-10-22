@@ -1,3 +1,5 @@
+let s:tree = {}
+
 function grit#grit(arg)
     call s:buf()
     call setline(1, s:execute(a:arg))
@@ -5,7 +7,18 @@ function grit#grit(arg)
 endfunction
 
 function grit#tree()
-    call append(line('.'), s:execute('tree ' . s:get_node(getline('.')))[1:])
+    let id = s:id(getline('.'))
+    if has_key(s:tree, id)
+        execute (line('.') + 1) . ',' . (line('.') + len(s:tree[id])) . 'delete'
+        call remove(s:tree, id)
+    else
+        let s:tree[id] = s:execute('tree ' . id)[1:]
+        if len(s:tree[id]) > 0
+            call append(line('.'), s:tree[id])
+        else
+            call remove(s:tree, id)
+        end
+    end
 endfunction
 
 function s:buf()
@@ -34,6 +47,6 @@ function s:execute(arg)
     return split(system('grit ' . a:arg), '\n')
 endfunctio
 
-function s:get_node(arg)
+function s:id(arg)
     return matchstr(matchstr(a:arg, '([0-9]\+)'), '[0-9]\+')
 endfunction
