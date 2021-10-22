@@ -6,8 +6,16 @@ function grit#grit(arg)
     call cursor(0, 0)
 endfunction
 
+function grit#expand()
+    let id = s:id(getline('.'))
+    let ls = s:execute('ls ' . id)
+    let sl = map(ls, '(v:key is len(ls) - 1 ? " └─" : " ├─") . v:val')
+    call append(line('.'), sl)
+endfunction
+
 function grit#tree()
     let id = s:id(getline('.'))
+    echo s:execute('ls ' . id)
     if has_key(s:tree, id)
         let k = 0
         if line('.') < line('$') - len(s:tree[id])
@@ -34,6 +42,8 @@ function s:buf()
     else
         call s:buf_open()
     end
+    execute '%delete'
+    let s:tree = {}
 endfunction
 
 function s:buf_goto(id)
@@ -47,7 +57,7 @@ endfunction
 function s:buf_open()
     execute 'new grit'
     set buftype=nofile
-    nmap <silent> <buffer> <cr> :call grit#tree() <cr>
+    nmap <silent> <buffer> <cr> :call grit#expand() <cr>
 endfunction
 
 function s:execute(arg)
