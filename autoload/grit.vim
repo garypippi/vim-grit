@@ -9,8 +9,15 @@ endfunction
 function grit#tree()
     let id = s:id(getline('.'))
     if has_key(s:tree, id)
+        let k = 0
+        if line('.') < line('$') - len(s:tree[id])
+            let k = 1
+        end
         execute (line('.') + 1) . ',' . (line('.') + len(s:tree[id])) . 'delete'
         call remove(s:tree, id)
+        if k
+            normal k
+        end
     else
         let s:tree[id] = s:execute('tree ' . id)[1:]
         if len(s:tree[id]) > 0
